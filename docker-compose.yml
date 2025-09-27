@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # vLLM - High-performance LLM inference server
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-server
+    runtime: nvidia
+    shm_size: '16gb'
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_TOKEN:-}
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./models:/models
+    ports:
+      - "127.0.0.1:8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: >
+      --model ${MODEL_NAME:-Qwen/Qwen2.5-14B-Instruct}
+      --dtype ${DTYPE:-auto}
+      --api-key ${VLLM_API_KEY}
+      --max-model-len ${MAX_MODEL_LEN:-16384}
+      --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION:-0.90}
+      --enforce-eager
+      --trust-remote-code
+      --port 8000
+      --host 0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - llm-network
+
+  # Open WebUI - Modern chat interface
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    volumes:
+      - ./open-webui-data:/app/backend/data
+    environment:
+      - OPENAI_API_BASE_URLS=http://vllm:8000/v1
+      - OPENAI_API_KEYS=${VLLM_API_KEY}
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
+      - ENABLE_SIGNUP=${ENABLE_SIGNUP:-false}
+      - DEFAULT_USER_ROLE=${DEFAULT_USER_ROLE:-pending}
+      - ENABLE_COMMUNITY_SHARING=${ENABLE_COMMUNITY_SHARING:-false}
+    ports:
+      - "0.0.0.0:3000:8080"
+    restart: unless-stopped
+    depends_on:
+      vllm:
+        condition: service_healthy
+    networks:
+      - llm-network
+
+networks:
+  llm-network:
+    driver: bridge
+
+volumes:
+  open-webui-data:
+    driver: local

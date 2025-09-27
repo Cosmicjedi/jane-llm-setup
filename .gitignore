@@ -1,0 +1,58 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Data directories
+open-webui-data/
+models/
+workspace/
+shared/
+
+# Docker volumes
+postgres-data/
+redis-data/
+nginx-cache/
+nginx-logs/
+prometheus-data/
+grafana-data/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Backup files
+*.backup
+*.bak
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+ssl/

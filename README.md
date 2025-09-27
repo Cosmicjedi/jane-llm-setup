@@ -1,161 +1,151 @@
-# LLM Setup - vLLM + Open WebUI
+# vLLM + Open WebUI Docker Setup
 
-Production-ready Docker Compose setup for running local LLMs with vLLM and Open WebUI.
+A streamlined Docker Compose setup for running vLLM with Open WebUI on your NVIDIA GPU.
 
-## Features
+## 🚀 Quick Start
 
-- **vLLM** for high-performance inference with FP8 quantization
-- **Open WebUI** for user-friendly interface
-- **Nginx** reverse proxy with SSL/TLS
-- **Security hardening** with rate limiting and API authentication
-- **Optional Cloudflare Tunnel** for zero-trust access
-- Optimized for **RTX 4090** with FP8 tensor cores
+1. **Prerequisites**
+   - Docker and Docker Compose installed
+   - NVIDIA GPU with drivers installed
+   - NVIDIA Container Toolkit configured
 
-## System Requirements
+2. **Setup and Run**
+   ```bash
+   # Clone or navigate to this directory
+   cd llm-setup
 
-- Ubuntu 22.04/24.04 LTS (recommended)
-- NVIDIA GPU with FP8 support (RTX 4090 or similar)
-- 32GB+ system RAM
-- Docker with NVIDIA Container Toolkit
-- 50GB+ free disk space
+   # Run the setup script
+   ./setup.sh
 
-## Quick Start
+   # Monitor the services (optional)
+   ./monitor.sh
+   ```
 
-### 1. Prerequisites
+3. **Access the Services**
+   - Open WebUI: http://localhost:3000
+   - vLLM API: http://localhost:8000
+   - API Documentation: http://localhost:8000/docs
 
-```bash
-# Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+## 📋 Configuration
 
-# Install NVIDIA Container Toolkit
-distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
-curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
-sudo apt update && sudo apt install -y nvidia-container-toolkit
-sudo systemctl restart docker
-```
+Edit the `.env` file to customize your setup:
 
-### 2. Setup
+- `MODEL_NAME`: The Hugging Face model to use (default: Qwen/Qwen2.5-14B-Instruct)
+- `MAX_MODEL_LEN`: Maximum context length (default: 16384)
+- `GPU_MEMORY_UTILIZATION`: GPU memory usage (default: 0.90)
+- `DTYPE`: Data type for model (default: auto, can be float16, float8, etc.)
 
-```bash
-# Clone the repository
-git clone https://github.com/Cosmicjedi/llm-setup.git
-cd llm-setup
-
-# Run setup script with your domain
-chmod +x setup.sh
-./setup.sh your-domain.com
-
-# Pull Docker images
-docker-compose pull
-```
-
-### 3. Configuration
-
-Edit `.env` file to customize:
-- Model selection (default: Qwen/Qwen2.5-14B-Instruct)
-- API keys
-- Hugging Face token (for gated models)
-- WebUI settings
-
-### 4. Deploy
+## 🔧 Management Commands
 
 ```bash
-# Production deployment with SSL
+# Start services
 docker-compose up -d
 
-# Development mode (with local ports exposed)
-docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+# Stop services
+docker-compose down
 
-# With Cloudflare Tunnel (most secure)
-docker-compose --profile cloudflare up -d
-```
-
-## Available Models
-
-Optimized for FP8 quantization on RTX 4090:
-
-| Model | VRAM Usage | Speed | Context |
-|-------|------------|-------|----------|
-| Qwen2.5-14B-Instruct | ~14GB | 70-90 t/s | 16K |
-| Llama-3.2-11B-Vision | ~11GB | 80-100 t/s | 128K |
-| Mistral-Small-22B | ~16GB | 50-65 t/s | 32K |
-
-## Security Features
-
-- ✅ API key authentication
-- ✅ Rate limiting (nginx)
-- ✅ SSL/TLS encryption
-- ✅ Network isolation
-- ✅ Security headers
-- ✅ User signup disabled by default
-- ✅ Optional Cloudflare Tunnel
-
-## Monitoring
-
-```bash
 # View logs
+docker-compose logs -f
+
+# View specific service logs
 docker-compose logs -f vllm
 docker-compose logs -f open-webui
 
-# Monitor GPU usage
-watch -n 1 nvidia-smi
+# Restart services
+docker-compose restart
 
-# Check service health
-curl http://localhost:8000/health
+# Pull latest images
+docker-compose pull
+
+# Check service status
+docker-compose ps
 ```
 
-## SSL Certificate Renewal
+## 📊 Monitoring
 
-Add to crontab for automatic renewal:
-```bash
-0 0 * * 0 certbot renew --quiet && docker-compose restart nginx
-```
-
-## Troubleshooting
-
-### GPU not detected
-```bash
-# Verify NVIDIA runtime
-docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
-```
-
-### Out of memory
-- Reduce `--max-model-len` in docker-compose.yml
-- Lower `--gpu-memory-utilization` to 0.9
-- Use smaller model or stronger quantization
-
-### Performance issues
-- Ensure GPU is in maximum performance mode
-- Check thermal throttling with `nvidia-smi`
-- Verify FP8 is being used (check vLLM logs)
-
-## Advanced Configuration
-
-### Custom Models
-
-Edit vLLM command in docker-compose.yml:
-```yaml
-command: >
-  --model your-model/name
-  --dtype float8  # or auto, float16, bfloat16
-  --max-model-len 8192
-  # Add more vLLM options as needed
-```
-
-### Firewall Setup
+Use the included monitoring script for real-time status:
 
 ```bash
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
+./monitor.sh
 ```
 
-## Contributing
+Or check GPU usage directly:
 
-Feel free to open issues or submit PRs for improvements!
+```bash
+nvidia-smi
+```
 
-## License
+## 🔑 API Usage
 
-MIT
+The vLLM server provides an OpenAI-compatible API. Use the API key from your `.env` file:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="your-vllm-api-key-here"  # From .env file
+)
+
+response = client.chat.completions.create(
+    model="Qwen/Qwen2.5-14B-Instruct",
+    messages=[
+        {"role": "user", "content": "Hello!"}
+    ]
+)
+print(response.choices[0].message.content)
+```
+
+## 🐛 Troubleshooting
+
+### GPU Not Detected
+```bash
+# Check NVIDIA driver
+nvidia-smi
+
+# Test GPU access in Docker
+docker run --rm --gpus all nvidia/cuda:12.1.0-base-ubuntu22.04 nvidia-smi
+```
+
+### Services Not Starting
+```bash
+# Check logs for errors
+docker-compose logs vllm
+docker-compose logs open-webui
+
+# Ensure ports are not in use
+sudo lsof -i :3000
+sudo lsof -i :8000
+```
+
+### Out of Memory
+- Reduce `GPU_MEMORY_UTILIZATION` in `.env`
+- Use a smaller model
+- Reduce `MAX_MODEL_LEN`
+
+## 📝 Notes
+
+- First run will download the model (~30GB for Qwen 14B)
+- The setup uses FP8/auto quantization for optimal performance on RTX 4090
+- Open WebUI data is persisted in `./open-webui-data`
+- Models are cached in `~/.cache/huggingface`
+
+## 🔒 Security
+
+- API keys are auto-generated on first setup
+- vLLM API is only accessible locally (127.0.0.1:8000)
+- Open WebUI is accessible on all interfaces (0.0.0.0:3000) - restrict this for production
+- User signup is disabled by default
+
+## 📈 Performance Tips
+
+For RTX 4090 (16GB VRAM):
+- Qwen2.5-14B with 16K context: ~70-90 tokens/sec
+- Use `--dtype float8` if supported for better performance
+- Enable `--enable-prefix-caching` for repeated prompts (add to docker-compose.yml)
+
+## 📚 Additional Resources
+
+- [vLLM Documentation](https://docs.vllm.ai/)
+- [Open WebUI Documentation](https://docs.openwebui.com/)
+- [Model Options on Hugging Face](https://huggingface.co/models)
