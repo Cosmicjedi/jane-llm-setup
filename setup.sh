@@ -27,6 +27,8 @@ else
     exit 1
 fi
 
+echo -e "${GREEN}✅ Using Docker Compose command: $DOCKER_COMPOSE${NC}"
+
 # Check for NVIDIA GPU
 if ! command -v nvidia-smi &> /dev/null; then
     echo -e "${YELLOW}⚠️  Warning: NVIDIA driver not detected!${NC}"
@@ -56,9 +58,10 @@ if [ ! -f .env ]; then
     
     cat > .env <<EOF
 # vLLM Configuration
-MODEL_NAME=Qwen/Qwen2.5-14B-Instruct
-MAX_MODEL_LEN=16384
-GPU_MEMORY_UTILIZATION=0.90
+# For GPUs with 16GB VRAM, use Qwen2.5-7B or smaller models
+MODEL_NAME=Qwen/Qwen2.5-7B-Instruct
+MAX_MODEL_LEN=8192
+GPU_MEMORY_UTILIZATION=0.95
 DTYPE=auto
 
 # Generated API Keys (SAVE THESE!)
@@ -72,6 +75,9 @@ ENABLE_COMMUNITY_SHARING=false
 
 # Optional: Hugging Face token for gated models
 HUGGING_FACE_TOKEN=
+
+# PyTorch memory optimization
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 EOF
     
     echo -e "${GREEN}✅ Created .env file with secure keys${NC}"
@@ -106,7 +112,7 @@ echo ""
 echo -e "${GREEN}✅ Setup complete!${NC}"
 echo ""
 echo "📍 Access points:"
-echo "  - Open WebUI: http://localhost:3000"
+echo "  - Open WebUI: http://localhost:3000 (or http://$(hostname -I | awk '{print $1}'):3000)"
 echo "  - vLLM API: http://localhost:8000"
 echo ""
 echo "📝 Useful commands:"
@@ -115,4 +121,4 @@ echo "  - Stop services: $DOCKER_COMPOSE down"
 echo "  - Restart services: $DOCKER_COMPOSE restart"
 echo "  - Check GPU usage: nvidia-smi"
 echo ""
-echo -e "${YELLOW}Note: First run will download the model (~30GB), this may take a while.${NC}"
+echo -e "${YELLOW}Note: First run will download the model (~15GB for 7B model), this may take a while.${NC}"
