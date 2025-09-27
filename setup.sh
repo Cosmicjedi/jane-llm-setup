@@ -16,8 +16,12 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check for Docker Compose
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+# Check for Docker Compose (both versions)
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+else
     echo -e "${RED}❌ Docker Compose is not installed!${NC}"
     echo "Please install Docker Compose first"
     exit 1
@@ -84,11 +88,11 @@ mkdir -p models open-webui-data
 
 # Pull latest images
 echo -e "${YELLOW}🐳 Pulling latest Docker images...${NC}"
-docker-compose pull
+$DOCKER_COMPOSE pull
 
 # Start services
 echo -e "${GREEN}🚀 Starting services...${NC}"
-docker-compose up -d
+$DOCKER_COMPOSE up -d
 
 # Wait for services to be healthy
 echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
@@ -96,7 +100,7 @@ sleep 5
 
 # Check service status
 echo -e "${GREEN}📊 Service Status:${NC}"
-docker-compose ps
+$DOCKER_COMPOSE ps
 
 echo ""
 echo -e "${GREEN}✅ Setup complete!${NC}"
@@ -106,9 +110,9 @@ echo "  - Open WebUI: http://localhost:3000"
 echo "  - vLLM API: http://localhost:8000"
 echo ""
 echo "📝 Useful commands:"
-echo "  - View logs: docker-compose logs -f"
-echo "  - Stop services: docker-compose down"
-echo "  - Restart services: docker-compose restart"
+echo "  - View logs: $DOCKER_COMPOSE logs -f"
+echo "  - Stop services: $DOCKER_COMPOSE down"
+echo "  - Restart services: $DOCKER_COMPOSE restart"
 echo "  - Check GPU usage: nvidia-smi"
 echo ""
 echo -e "${YELLOW}Note: First run will download the model (~30GB), this may take a while.${NC}"
