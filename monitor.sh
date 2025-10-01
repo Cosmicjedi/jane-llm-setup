@@ -37,7 +37,7 @@ while true; do
     
     # Container Status
     echo -e "${GREEN}📦 Container Status:${NC}"
-    docker-compose ps --format "table {{.Name}}\t{{.Status}}\t{{.State}}" 2>/dev/null | tail -n +2 | \
+    docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.State}}" 2>/dev/null | tail -n +2 | \
     while IFS=$'\t' read -r name status state; do
         if [[ $state == *"running"* ]]; then
             echo -e "  ✅ $name: ${GREEN}$status${NC}"
