@@ -12,7 +12,7 @@ A streamlined Docker Compose setup for running vLLM with Open WebUI on your NVID
 2. **Setup and Run**
    ```bash
    # Clone or navigate to this directory
-   cd llm-setup
+   cd jane-llm-setup
 
    # Run the setup script
    ./setup.sh
@@ -21,7 +21,27 @@ A streamlined Docker Compose setup for running vLLM with Open WebUI on your NVID
    ./monitor.sh
    ```
 
-3. **Access the Services**
+3. **Interactive Model Selector (NEW!)** ⭐
+   ```bash
+   # Launch the interactive model selector
+   ./select_model.py
+   ```
+   
+   Features:
+   - 🎯 Easy switching between multiple LLM models
+   - 🎨 Beautiful color-coded terminal UI
+   - 📊 Real-time service status monitoring
+   - 📝 Integrated log viewer
+   - 🔄 Quick restart and health checks
+   
+   Supported Models:
+   - Qwen2.5-7B-Instruct (default)
+   - Mistral-7B-Instruct-v0.3
+   - Mistral-7B-Instruct-v0.2
+   - Llama-3-8B-Instruct
+   - Phi-3-Mini-Instruct
+
+4. **Access the Services**
    - Open WebUI: http://localhost:3000 (or http://your-server-ip:3000)
    - vLLM API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
@@ -44,6 +64,60 @@ Edit the `.env` file to customize your setup:
 - `MAX_MODEL_LEN`: Maximum context length (default: 8192)
 - `GPU_MEMORY_UTILIZATION`: GPU memory usage (default: 0.95)
 - `DTYPE`: Data type for model (default: auto, can be float16, bfloat16)
+
+## 🎯 Interactive Model Selector
+
+The included `select_model.py` script provides an easy way to switch between different LLM models:
+
+### Usage
+
+```bash
+./select_model.py
+```
+
+### Features
+
+- **[1-5]**: Select from 5 pre-configured models
+- **[s]**: Stop all services
+- **[l]**: View logs in real-time
+- **[r]**: Restart services
+- **[h]**: Check health status
+- **[q]**: Quit
+
+### How It Works
+
+The selector:
+1. Updates your `.env` file with the chosen model
+2. Stops running containers gracefully
+3. Restarts services with the new model
+4. Shows real-time status and endpoints
+
+### Model Options
+
+| # | Model | VRAM | Context | Description |
+|---|-------|------|---------|-------------|
+| 1 | Qwen2.5-7B-Instruct | ~14GB | 8K | Default - Excellent general purpose |
+| 2 | Mistral-7B-Instruct-v0.3 | ~14GB | 4K | Strong reasoning capabilities |
+| 3 | Mistral-7B-Instruct-v0.2 | ~14GB | 4K | Previous Mistral version |
+| 4 | Llama-3-8B-Instruct | ~16GB | 8K | Meta's latest (requires HF token) |
+| 5 | Phi-3-Mini-Instruct | ~8GB | 4K | Lower VRAM option |
+
+### Example Workflow
+
+```bash
+# Start the selector
+./select_model.py
+
+# Choose option [2] for Mistral
+# Confirm with 'y'
+# Wait ~2 minutes for model to load
+
+# Press [h] to check health
+# Press [l] to view logs
+# Press [q] to exit
+
+# Open WebUI will now use the new model!
+```
 
 ## 🔧 Management Commands
 
