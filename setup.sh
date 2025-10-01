@@ -16,18 +16,19 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check for Docker Compose (both versions)
+# Check for Docker Compose V2 (preferred) or V1 (fallback)
 if docker compose version &> /dev/null; then
     DOCKER_COMPOSE="docker compose"
+    echo -e "${GREEN}✅ Using Docker Compose V2 (docker compose)${NC}"
 elif command -v docker-compose &> /dev/null; then
     DOCKER_COMPOSE="docker-compose"
+    echo -e "${YELLOW}⚠️  Using Docker Compose V1 (docker-compose)${NC}"
+    echo -e "${YELLOW}   Consider upgrading to Docker Compose V2: https://docs.docker.com/compose/install/${NC}"
 else
     echo -e "${RED}❌ Docker Compose is not installed!${NC}"
-    echo "Please install Docker Compose first"
+    echo "Please install Docker Compose V2: https://docs.docker.com/compose/install/"
     exit 1
 fi
-
-echo -e "${GREEN}✅ Using Docker Compose command: $DOCKER_COMPOSE${NC}"
 
 # Check for NVIDIA GPU
 if ! command -v nvidia-smi &> /dev/null; then

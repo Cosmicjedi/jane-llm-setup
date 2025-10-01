@@ -208,8 +208,18 @@ sudo lsof -i :8000
 - Reduce `MAX_MODEL_LEN`
 - Enable quantization: set `DTYPE=float8` or `DTYPE=int8`
 
-### Docker Compose Command Not Found
-If you get `docker-compose: command not found`, the script will automatically try `docker compose` (without hyphen) which is the newer version.
+### Docker Compose Not Found
+This setup uses Docker Compose V2 (`docker compose` without hyphen). If you get a command not found error:
+```bash
+# Check your Docker Compose version
+docker compose version
+
+# If using the old standalone version
+docker-compose version
+
+# Update to Docker Compose V2
+# https://docs.docker.com/compose/install/
+```
 
 ## 📝 Notes
 
@@ -217,6 +227,7 @@ If you get `docker-compose: command not found`, the script will automatically tr
 - The setup uses automatic quantization for optimal performance
 - Open WebUI data is persisted in `./open-webui-data`
 - Models are cached in `~/.cache/huggingface`
+- This setup uses Docker Compose V2 (`docker compose` command)
 
 ## 🔒 Security
 
@@ -241,3 +252,4 @@ For memory optimization:
 - [vLLM Documentation](https://docs.vllm.ai/)
 - [Open WebUI Documentation](https://docs.openwebui.com/)
 - [Model Options on Hugging Face](https://huggingface.co/models)
+- [Docker Compose V2](https://docs.docker.com/compose/)
