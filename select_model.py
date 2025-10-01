@@ -124,7 +124,7 @@ def stop_services():
     """Stop all running services"""
     print(f"\n{Colors.WARNING}Stopping all services...{Colors.ENDC}")
     try:
-        subprocess.run(['docker-compose', 'down'], check=True)
+        subprocess.run(['docker', 'compose', 'down'], check=True)
         print(f"{Colors.OKGREEN}✓ All services stopped{Colors.ENDC}")
         return True
     except subprocess.CalledProcessError as e:
@@ -176,7 +176,7 @@ def start_services(model_config: Dict):
     print(f"{Colors.WARNING}This may take 1-3 minutes for first startup...{Colors.ENDC}")
     
     try:
-        subprocess.run(['docker-compose', 'up', '-d'], check=True)
+        subprocess.run(['docker', 'compose', 'up', '-d'], check=True)
         print(f"{Colors.OKGREEN}✓ Services started{Colors.ENDC}")
         print(f"\n{Colors.OKBLUE}Available interfaces:{Colors.ENDC}")
         print(f"  • vLLM API: http://localhost:8000")
@@ -194,7 +194,7 @@ def view_logs():
     print(f"\n{Colors.OKCYAN}Viewing logs...{Colors.ENDC}")
     print(f"{Colors.WARNING}(Press Ctrl+C to exit){Colors.ENDC}\n")
     try:
-        subprocess.run(['docker-compose', 'logs', '-f'])
+        subprocess.run(['docker', 'compose', 'logs', '-f'])
     except KeyboardInterrupt:
         print(f"\n{Colors.OKGREEN}Exiting log viewer{Colors.ENDC}")
 
@@ -223,7 +223,7 @@ def check_health():
     
     # Show Docker status
     print(f"\n{Colors.OKBLUE}Docker containers:{Colors.ENDC}")
-    subprocess.run(['docker-compose', 'ps'])
+    subprocess.run(['docker', 'compose', 'ps'])
 
 
 def main():
@@ -277,7 +277,7 @@ def main():
         
         elif choice == 'r':
             print(f"\n{Colors.WARNING}Restarting services...{Colors.ENDC}")
-            subprocess.run(['docker-compose', 'restart'], check=False)
+            subprocess.run(['docker', 'compose', 'restart'], check=False)
             print(f"{Colors.OKGREEN}✓ Services restarted{Colors.ENDC}")
             input(f"\n{Colors.OKBLUE}Press Enter to continue...{Colors.ENDC}")
         
@@ -327,12 +327,13 @@ def main():
 
 
 if __name__ == "__main__":
-    # Check if docker-compose is available
+    # Check if docker compose is available
     try:
-        subprocess.run(['docker-compose', '--version'], 
+        subprocess.run(['docker', 'compose', 'version'], 
                       capture_output=True, check=True)
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print(f"{Colors.FAIL}Error: docker-compose is not installed or not in PATH{Colors.ENDC}")
+        print(f"{Colors.FAIL}Error: docker compose is not installed or not in PATH{Colors.ENDC}")
+        print(f"{Colors.WARNING}Install Docker Compose V2: https://docs.docker.com/compose/install/{Colors.ENDC}")
         sys.exit(1)
     
     # Check if we're in the right directory
